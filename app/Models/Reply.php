@@ -10,6 +10,8 @@ class Reply extends Model
 {
     use HasFactory;
 
+    protected $guarded = [];
+
     /*
      * Foreign Key
      *
@@ -17,5 +19,10 @@ class Reply extends Model
     public function ticket() : BelongsTo
     {
         return $this->belongsTo(Ticket::class);
+    }
+
+    public function owner() : BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 }

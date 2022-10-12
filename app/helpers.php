@@ -11,5 +11,5 @@ enum Status: string
 {
     case OPEN = "Open";
     case PROCESSING = "Processing";
-    case FINISHED = "Finished";
+    case FINISHED = "Solved";
 };

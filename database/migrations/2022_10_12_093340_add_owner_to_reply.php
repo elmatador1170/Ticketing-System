@@ -13,20 +13,12 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('replies', function (Blueprint $table) {
-            $table->id();
-            $table->text("content");
-            $table->integer("ticket_id")->nullable();
-            $table->foreign("ticket_id")
-                ->references("id")
-                ->on("tickets")
-                ->onDelete("set null");
+        Schema::table('replies', function (Blueprint $table) {
             $table->integer("owner_id")->nullable();
             $table->foreign("owner_id")
                 ->references("id")
                 ->on("users")
                 ->onDelete("set null");
-            $table->timestamps();
         });
     }
 
@@ -37,6 +29,8 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('replies');
+        Schema::table('replies', function (Blueprint $table) {
+            //
+        });
     }
 };

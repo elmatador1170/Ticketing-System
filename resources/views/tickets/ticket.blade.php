@@ -10,9 +10,14 @@
 
     <div class="header-wrapper d-flex justify-content-between align-items-center">
         <h3>{{ $ticket->subject }}</h3>
-        <a href="#">
-            <p>{{ $ticket->area->name }}</p>
-        </a>
+        @if($ticket->owner == auth()->user())
+            <form method="post" action="/tickets/delete/{{ $ticket->id }}">
+                @csrf
+                <button class="btn-error rounded">
+                    Delete
+                </button>
+            </form>
+        @endif
     </div>
     <hr class="mt-1">
     <div class="short-info">
@@ -52,16 +57,17 @@
             <span>
                 Status:
             </span>
-            <select class="ml-2 btn btn-sm btn-secondary dropdown-toggle small">
-                @foreach($statuses as $status)
-                    <option class="dropdown-item">{{ $status }}</option>
-                @endforeach
-            </select>
-            <form class="ml-2" method="post" action="/tickets/update/{{ $ticket->id }}">
-                @csrf
-                <input type="radio" id="status" name="status" value="Finished" hidden>
-                <button class="border text-sm" type="submit">Mark as solved</button>
-            </form>
+            @unless ($ticket->status == "Solved")
+                <form class="ml-2" method="post" action="/tickets/solve/{{ $ticket->id }}">
+                    @csrf
+                    <input type="radio" id="status" name="status" value="Solved" hidden>
+                    <button class="border text-sm" type="submit">Mark as solved</button>
+                </form>
+            @else
+                <span class="ml-2">
+                    Solved
+                </span>
+            @endunless
         </div>
         <div class="d-flex flex-row mb-2 align-items-center">
             <span>
@@ -75,17 +81,57 @@
         </div>
     </div>
 
-    <div class="header-wrapper mt-5 d-flex justify-content-between align-items-center">
-        <h5>Replies</h5>
-        <a href="#">
-            <button class="btn-primary rounded">
-                New Reply
-            </button>
-        </a>
-        @foreach($ticket->replies as $reply)
-            <span>{{ $reply }}</span>
-        @endforeach
+    <div class="description">
+        <div class="header-wrapper mt-5 d-flex flex-column">
+            <h5>Description</h5>
+            <p>
+                {{ $ticket->description }}
+            </p>
+        </div>
     </div>
 
+    <div class="replies-wrapper">
+        <div class="header-wrapper mt-5 d-flex justify-content-between align-items-center">
+            <h5>Replies</h5>
+            <a href="#">
+                <button class="btn-primary rounded" id="new-reply">
+                    New Reply
+                </button>
+            </a>
+        </div>
+        @unless($replies->isEmpty())
+            <div class="mt-3 mb-3">
+                @foreach($replies as $reply)
+                    <div class="bg-light p-3 mb-2">
+                        <small class="border-bottom mb-3">{{ $reply->owner->name }}</small>
+                        <p class="mb-0 mt-2">{{ $reply->content }}</p>
+                    </div>
+
+                @endforeach
+            </div>
+        @endunless
+        <div class="mt-3 new-reply-wrapper d-none" id="new-reply-box">
+            <form method="POST" action="/tickets/{{ $ticket->id }}/replies/store">
+                @csrf
+                <div class="d-flex flex-column">
+                    <label for="content">Create new reply</label>
+                    <textarea class="input border" id="reply" name="content">Was passt dir nicht?</textarea>
+                </div>
+                <button class="btn-primary rounded mt-2">
+                    Create
+                </button>
+            </form>
+        </div>
+    </div>
+
+
+    <script>
+        $(document).ready(function() {
+           $("#new-reply").click(function() {
+               console.log("HAHAH");
+               $("#new-reply-box").removeClass("d-none");
+           })
+        });
+    </script>
 
 @endsection

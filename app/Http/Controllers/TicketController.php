@@ -20,7 +20,7 @@ class TicketController extends Controller
     public function index() : View
     {
         return view("tickets/tickets", [
-            "tickets" => Ticket::with("area")->get()
+            "tickets" => Ticket::with("area")->orderBy("created_at", "desc")->get()
         ]);
     }
 
@@ -47,7 +47,7 @@ class TicketController extends Controller
     {
         $attributes = $request->validate([
             "subject" => ["required", "min:3", "max:50"],
-            "description" => ["required", "min:10", "max:500"],
+            "description" => ["required", "min:10", "max:5000"],
             "area_id" => "required",
             "priority" => "required"
         ]);
@@ -56,7 +56,7 @@ class TicketController extends Controller
         $ticket->owner_id = auth()->id();
         $ticket->save();
 
-        redirect("tickets/");
+        return redirect("tickets/");
     }
 
     /**
@@ -70,6 +70,7 @@ class TicketController extends Controller
         $ticket = Ticket::findOrFail($id);
         return view("/tickets/ticket", [
             "ticket" => $ticket,
+            "replies" => $ticket->replies,
             "priorities" => Priority::cases(),
             "statuses" => Status::cases()
         ]);
@@ -95,18 +96,39 @@ class TicketController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+
     }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function solve(Request $request, $id)
+    {
+        $status = request()->input("status", Status::FINISHED);
+        $ticket = Ticket::findOrFail($id);
+        $ticket->status = $status;
+        $ticket->save();
+
+        return back();
+    }
+
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param int $id
      * @return \Illuminate\Http\Response
      */
     public function destroy($id)
     {
-        $response = Ticket::where("id", $id)->delete();
-        redirect("tickets");
+        $ticket = Ticket::find($id);
+        if ($ticket->owner == auth()->user()) {
+            $ticket->delete();
+        }
+        return redirect("/tickets/");
     }
 }

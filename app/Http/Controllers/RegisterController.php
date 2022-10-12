@@ -35,7 +35,7 @@ class RegisterController extends Controller
         $user = User::create($validated_data);
         auth()->login($user);
 
-        redirect("/");
+        return redirect("/");
     }
 
     /**

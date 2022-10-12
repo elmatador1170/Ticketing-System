@@ -32,7 +32,7 @@ class LoginController extends Controller
 
 
         if (auth()->attempt($credentials)) {
-            redirect("/tickets/");
+            return redirect("/tickets/");
         }
 
         return back()->withErrors([
